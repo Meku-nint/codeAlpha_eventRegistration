@@ -4,7 +4,7 @@ const router=Router();
 router.post('/addEvent',addEvent);
 router.post('/registerForEvent',registerForEvent);
 router.get('/getAllEvents',getAllEvents);
-router.get('/getAllUsers/:eventId',getAllUsers);
+router.get('/getAllUsers',getAllUsers);
 router.get('/getAllAdmins',getAllAdmins);
 router.post('/addAdmin',addAdmin);
 router.post('/checkRegistration',checkRegistration);

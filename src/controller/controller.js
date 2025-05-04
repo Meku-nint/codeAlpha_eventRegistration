@@ -1,21 +1,28 @@
 // Description: This file contains the controller functions for handling requests and responses.
-import Event from "../models/models.js";
-import User from "../models/models.js";
-import Admin from "../models/models.js";
+import models from '../models/models.js'
+const {Admin}=models;
+const {Event}=models;
+const {User}=models;
 export const addEvent=async(req,res)=>{
     // this function is used to create a new event
-     const {title,description,location,date,time}=req.body;
+     const {title,description,location,date,time,numberOfSeats}=req.body;
      try {
-        if(!title || !description || !location || !date || !time){
+        if(!title || !description || !location || !date || !time||!numberOfSeats){
            throw new Error("Please fill all the fields");
         }
         const Id=Math.floor(Math.random()*1000000);
-        const event=new Event({title,description,location,date,time,eventId:Id});
-        await event.save();
+        const newEvent=new Event({title,
+            description,
+            location,
+            date,
+            time,
+            eventId:Id,
+            numberOfSeats});
+        await newEvent.save();
         res.status(200).json({
             success:true,
             message:"Event created successfully",
-            event
+            newEvent
         })
      } catch (error) {
         res.status(500).json({
@@ -25,21 +32,26 @@ export const addEvent=async(req,res)=>{
      }
 }
 export const registerForEvent=async(req,res)=>{
-    // this function is used to register a user for an event
-    const {name,email,phone,address,eventId}=req.body;
+    const {name,email,phone,eventId}=req.body;
     try {
-        if(!name || !email || !phone || !address || !eventId){
+
+        if(!name || !email || !phone || !eventId){
             throw new Error("Please fill all the fields");
+        }
+        const freeSpot=await User.countDocuments({eventId});
+        const eventSize=await Event.findOne({eventId});
+        if(freeSpot>=eventSize.numberOfSeats){
+            throw new Error("No free spots available");
         }
         const event=await Event.findOne({eventId});
         if(!event){
             throw new Error("Event not found");
         }
-        const user=await User.findOne({email});
+        const user=await User.findOne({email,eventId});
         if(user){
             throw new Error("User already registered");
         }
-        const newUser=new User({name,email,phone,address,eventId});
+        const newUser=new User({name,email,phone,eventId});
         await newUser.save();
     } catch (error) {
          res.status(500).json({message:error.message});
@@ -61,17 +73,22 @@ export const getAllEvents=async(req,res)=>{
     }
 }
 export const getAllUsers=async(req,res)=>{
-    // this function is used to get all the users
-    const {eventId}=req.params;
+    const {eventId}=req.body;
     try {
         if(!eventId){
             throw new Error("Please provide eventId");
         }
-        const users=await User.find({eventId});
+        const users = await User.find({ eventId });
+
+        const userData = users.map(user => ({
+          name: user.name,
+          email: user.email
+        }));
+        
         res.status(200).json({
-            success:true,
-            users
-        })
+          success: true,
+          users: userData
+        });
     } catch (error) {
         res.status(500).json({
             success:false,
@@ -95,13 +112,12 @@ export const getAllAdmins=async(req,res)=>{
     }
 }
 export const addAdmin=async(req,res)=>{
-    // this function is used to create a new admin
-    const {name,email,phone,address}=req.body;
+    const {name,email,password}=req.body;
     try {
-        if(!name || !email || !phone || !address){
+        if(!name || !email || !password){
             throw new Error("Please fill all the fields");
         }
-        const admin=new Admin({name,email,phone,address});
+        const admin=new Admin({name,email,password});
         await admin.save();
         res.status(200).json({
             success:true,
@@ -122,13 +138,13 @@ export const checkRegistration=async(req,res)=>{
         if(!eventId || !email){
             throw new Error("Please fill all the fields");
         }
-        const user=await User.findOne({email});
+        const user=await User.findOne({email,eventId});
         if(!user){
             throw new Error("User not found");
         }
         res.status(200).json({
             success:true,
-            registered:user.eventId===eventId
+            registered:user.eventId==eventId
         })
     } catch (error) {
         res.status(500).json({
@@ -161,7 +177,6 @@ export const deleteEvent=async(req,res)=>{
     }
 }
 export const deleteUser=async(req,res)=>{
-    // this function is used to delete a user
     const {userId}=req.params;
     try {
         if(!userId){

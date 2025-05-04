@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const userSchema=new mongoose.Schema({
     name:{
         type:String,
@@ -11,6 +10,10 @@ const userSchema=new mongoose.Schema({
     },
     phone:{
         type:String,
+        required:true
+    },
+    eventId:{
+        type:Number,
         required:true
     }
 },{
@@ -26,11 +29,7 @@ const adminSchema=new mongoose.Schema({
         required:true,
         unique:true
     },
-    phone:{
-        type:String,
-        required:true
-    },
-    address:{
+    password:{
         type:String,
         required:true
     }
@@ -60,13 +59,16 @@ const eventSchema=new mongoose.Schema({
     },
     eventId:{
         type:Number,
-        required:true,
         unique:true
-    }
+    },
+    numberOfSeats:{
+        type:Number,
+        required:true
+    },
 },{
     timestamps:true
 })
 const Event=mongoose.model("Event",eventSchema);
 const Admin=mongoose.model("Admin",adminSchema);
 const User=mongoose.model("User",userSchema);
-export default {Event,Admin,User};
+export default{Event,Admin,User};
