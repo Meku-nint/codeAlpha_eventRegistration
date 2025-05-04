@@ -1,5 +1,7 @@
 // Description: This file contains the controller functions for handling requests and responses.
-import {Event,Admin,User} from "../models/models.js";
+import Event from "../models/models.js";
+import User from "../models/models.js";
+import Admin from "../models/models.js";
 export const addEvent=async(req,res)=>{
     // this function is used to create a new event
      const {title,description,location,date,time}=req.body;

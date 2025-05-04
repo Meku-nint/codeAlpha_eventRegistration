@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { addEvent,registerForEvent,getAllEvents,getAllUsers,getAllAdmins,addAdmin,checkRegistration,deleteEvent,deleteUser } from "../controller/controller.js";
 const router=Router();
-
 router.post('/addEvent',addEvent);
 router.post('/registerForEvent',registerForEvent);
 router.get('/getAllEvents',getAllEvents);
